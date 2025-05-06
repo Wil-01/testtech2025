@@ -1,7 +1,9 @@
 # Nextlead Test Technique
 
 Bienvenue sur le **Test Technique Nextlead**.
-Ce Repository est une boilerplate pour votre test technique. Tous les outils nécessaires à la réalisation de votre test ont été préinstallés et préconfigurés par nos soins.
+
+- Ce Repository est une boilerplate pour votre test technique. Tous les outils nécessaires à la réalisation de votre test ont été préinstallés et préconfigurés par nos soins.
+- Merci de suivre attentivement les instructions ci-dessous afin de bien démarrer.
 
 Ce projet utilise les technologies suivantes :
 
