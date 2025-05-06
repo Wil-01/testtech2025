@@ -4,12 +4,13 @@ Bienvenue sur le **Test Technique Nextlead**.
 
 Ce projet utilise les technologies suivantes :
 
-- [Next.js 14](https://nextjs.org/)
-- [Prisma](https://www.prisma.io/)
+- [Next.js 15.3.1](https://nextjs.org/)
+- [Prisma 6.7.0](https://www.prisma.io/)
 - [Neon Database](https://neon.tech/)
 - [Zod](https://zod.dev/)
 - [shadcn/ui](https://ui.shadcn.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
+- [React 19](https://react.dev/)
 
 ## Prérequis
 
@@ -63,11 +64,12 @@ Ce projet utilise les technologies suivantes :
 
 ## Structure du projet
 
-- `/prisma` : Schéma Prisma et migrations (Le model todo est à modifier)
+- `/prisma` : Schéma Prisma et migrations (Le model Example est à modifier)
 - `/components` : Composants React (UI) (Global au projet)
 - `/app` : Pages Next.js
 - `/app/api` : Api Next.js
 - `/lib` : Fonctions utilitaires (Global au projet)
+- /test-technique/_* sont les différents dossier local aux composants de la page de votre rendu
 
 ## Ressources
 
@@ -77,6 +79,7 @@ Ce projet utilise les technologies suivantes :
 - [Documentation Zod](https://zod.dev/?id=table-of-contents)
 - [Documentation shadcn/ui](https://ui.shadcn.com/docs)
 - [Documentation Tailwind CSS](https://tailwindcss.com/docs)
+- [Documentation React](https://react.dev/)
 
 ---
 
