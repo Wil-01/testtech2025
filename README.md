@@ -113,5 +113,5 @@ Ce projet repose sur les technologies suivantes :
 
 ## 🙋 Besoin d'aide ?
 
-Si vous avez des questions, n’hésitez pas à contacter l’équipe **Nextlead**.  
+Si vous avez des questions, n’hésitez pas à contacter l’équipe **Nextlead**.
 Bonne chance pour votre test ! 💪
