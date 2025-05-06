@@ -2,10 +2,28 @@
 
 Bienvenue sur le **Test Technique Nextlead**.
 
-Ce Repository est une boilerplate pour votre test technique. Tous les outils nécessaires à la réalisation de votre test ont été préinstallés et préconfigurés par nos soins.
+Ce repository est une **boilerplate** pour votre test technique.  
+Tous les outils nécessaires à sa réalisation ont été **préinstallés et préconfigurés** par nos soins.
+
 Merci de suivre attentivement les instructions ci-dessous afin de bien démarrer.
-Je vous recommande également d'utiliser le package manager `pnpm` mais vous pouvez utiliser `yarn`ou `npm`
-Neon est un service PostgreSQL gratuit pour les tests techniques et petits projets. Si votre projet grandit, des frais peuvent s’appliquer — mais pour ce test, aucun risque de dépassement.
+
+---
+
+## 🧰 Gestionnaire de paquets
+
+Nous vous recommandons d’utiliser **[`pnpm`](https://pnpm.io/)** pour ce projet.  
+Cependant, `yarn` ou `npm` peuvent également fonctionner.
+
+---
+
+## 💡 À savoir : Base de données
+
+Ce projet utilise [**Neon**](https://neon.tech), un service PostgreSQL.  
+Il est **gratuit** pour les tests techniques et les petits projets.  
+Si votre projet évolue fortement, des frais peuvent s’appliquer —  
+**mais dans le cadre de ce test, aucun risque de dépassement.**
+
+---
 
 Ce projet utilise les technologies suivantes :
 
@@ -88,4 +106,4 @@ Ce projet utilise les technologies suivantes :
 
 ---
 
-Si vous avez des questions, n'hésitez pas à contacter l'équipe Nextlead. Bonne chance pour le test technique !
+Si vous avez des questions, n'hésitez pas à contacter l'équipe Nextlead. Bonne chance ! 💪
