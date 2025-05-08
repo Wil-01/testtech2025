@@ -11,13 +11,19 @@ const connectionString = `${process.env.DATABASE_URL}`;
 const adapter = new PrismaNeon({ connectionString });
 
 declare global {
+  namespace NodeJS {
+    interface Global {
+      prisma?: PrismaClient;
+    }
+  }
+
   var prisma: PrismaClient | undefined;
 }
 
-const prisma = global.prisma ?? new PrismaClient({ adapter });
+const prisma = globalThis.prisma ?? new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV === "development") {
-  global.prisma = prisma;
+  globalThis.prisma = prisma;
 }
 
 export default prisma;
