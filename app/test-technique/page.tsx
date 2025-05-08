@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Image from "next/image";
+import { useRouter } from 'next/navigation';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -113,6 +114,7 @@ const getDefaultValues = (): FormValues => {
 }
 
 export default function QuestionnairePage() {
+  const router = useRouter();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
@@ -158,6 +160,7 @@ export default function QuestionnairePage() {
       });
   
       form.reset(); 
+      router.push(`/test-technique/merci?responseId=${result.responseId || ''}`);
   
     } catch (error) {
       console.error("Erreur réseau ou fetch:", error);
@@ -276,7 +279,7 @@ export default function QuestionnairePage() {
   return (
     <div className="container mx-auto max-w-2xl py-8 px-4">
       <div className="mb-8 text-center">
-        {questionnaireHeader.imageUrl && questionnaireHeader.imageUrl.startsWith('http') && (
+        {questionnaireHeader.imageUrl && (questionnaireHeader.imageUrl.startsWith('http') || questionnaireHeader.imageUrl.startsWith('/')) && (
            <Image
             src={questionnaireHeader.imageUrl}
             alt="En-tête du questionnaire"

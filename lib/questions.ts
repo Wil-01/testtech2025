@@ -1,4 +1,3 @@
-// lib/questions.ts
 export interface QuestionOption {
     value: string;
     label: string;
@@ -20,12 +19,11 @@ export interface QuestionOption {
     options?: QuestionOption[]; 
     placeholder?: string;
     required?: boolean; 
-    // defaultValue?: any; // Pourrait être utile
   }
   
   export const questionnaireHeader = {
-    imageUrl: "https://via.placeholder.com/600x200.png?text=Image+d'intro+du+Questionnaire", 
-    title: "Titre du Questionnaire Global",
+    imageUrl: "/images/avatar.png", 
+    title: "Questionnaire tech",
     description: "Bienvenue dans notre questionnaire. Vos réponses nous sont précieuses !",
   };
   
@@ -64,7 +62,7 @@ export interface QuestionOption {
       title: 'Composants Shadcn/ui utilisés',
       description: 'Quels composants Shadcn/ui avez-vous déjà utilisés ? (Plusieurs choix possibles)',
       type: QuestionType.MULTI_SELECT,
-      required: true, // Au moins un choix
+      required: true, 
       options: [
         { value: 'button', label: 'Button' },
         { value: 'input', label: 'Input' },
