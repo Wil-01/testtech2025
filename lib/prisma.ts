@@ -11,6 +11,8 @@ neonConfig.webSocketConstructor = ws;
 neonConfig.poolQueryViaFetch = true;
 
 // Type definitions
+
+// eslint-disable-next-line no-var
 declare global {
   var prisma: PrismaClient | undefined;
 }
