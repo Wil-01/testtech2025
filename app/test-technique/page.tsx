@@ -61,7 +61,7 @@ const generateFormSchema = () => {
         break;
       case QuestionType.RADIO:
         baseSchema = z.string({ required_error: "Veuillez sélectionner une option." });
-        if (!question.required) { // Si non requis, le rendre optionnel
+        if (!question.required) {
           baseSchema = (baseSchema as z.ZodString).optional();
         }
         break;
@@ -120,21 +120,52 @@ export default function QuestionnairePage() {
   const isLoading = form.formState.isSubmitting;
 
   async function onSubmit(data: FormValues) {
-    console.log("Données du formulaire soumises:", data);
+    const submissionToastId = "form-submission-toast";
+  
+    console.log("Données du formulaire à envoyer:", data);
+  
     toast.loading("Formulaire en cours d'envoi...", {
+      id: submissionToastId,
       description: "Veuillez patienter.",
     });
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    toast.success("Réponses (simulées) envoyées !", {
-      description: (
-        <pre className="mt-2 w-full max-w-[340px] overflow-x-auto rounded-md bg-slate-900 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-      duration: 5000,
-    });
+  
+    try {
+      const response = await fetch('/api/submit-questionnaire', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+  
+      const result = await response.json(); 
+  
+      if (!response.ok) {
+        console.error("Erreur API:", result);
+        toast.error("Erreur lors de l'envoi des réponses.", {
+          id: submissionToastId,
+          description: result.message || "Une erreur s'est produite. Veuillez réessayer.",
+          duration: 5000,
+        });
+        return; 
+      }
+  
+      toast.success("Réponses enregistrées avec succès !", {
+        id: submissionToastId,
+        description: `Merci ! Votre ID de réponse est : ${result.responseId || ''}`,
+        duration: 7000, 
+      });
+  
+      form.reset(); 
+  
+    } catch (error) {
+      console.error("Erreur réseau ou fetch:", error);
+      toast.error("Erreur réseau.", {
+        id: submissionToastId,
+        description: "Impossible de joindre le serveur. Veuillez vérifier votre connexion.",
+        duration: 5000,
+      });
+    }
   }
 
   const renderQuestionField = (question: Question) => {
@@ -244,7 +275,7 @@ export default function QuestionnairePage() {
   return (
     <div className="container mx-auto max-w-2xl py-8 px-4">
       <div className="mb-8 text-center">
-        {questionnaireHeader.imageUrl && questionnaireHeader.imageUrl.startsWith('http') && ( 
+        {questionnaireHeader.imageUrl && questionnaireHeader.imageUrl.startsWith('http') && (
            <Image
             src={questionnaireHeader.imageUrl}
             alt="En-tête du questionnaire"
