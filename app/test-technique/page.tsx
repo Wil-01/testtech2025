@@ -98,14 +98,15 @@ const formSchema = generateFormSchema();
 type FormValues = z.infer<typeof formSchema>;
 
 const getDefaultValues = (): FormValues => {
-  const defaultValues: Partial<FormValues> = {};
+  const defaultValues: Partial<FormValues> = {}; 
   questions.forEach(q => {
+    const key = q.id as keyof FormValues;
     if (q.type === QuestionType.MULTI_SELECT) {
-      defaultValues[q.id as keyof FormValues] = [] as any;
+      defaultValues[key] = []; 
     } else if (q.type === QuestionType.NUMBER) {
-      defaultValues[q.id as keyof FormValues] = undefined as any;
+      defaultValues[key] = undefined; 
     } else {
-      defaultValues[q.id as keyof FormValues] = "" as any;
+      defaultValues[key] = ""; 
     }
   });
   return defaultValues as FormValues;
