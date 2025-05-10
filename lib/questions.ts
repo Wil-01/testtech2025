@@ -72,6 +72,24 @@ export interface QuestionOption {
       ],
     },
     {
+      id: 'isDeveloper',
+      title: 'Êtes-vous développeur ?',
+      type: QuestionType.RADIO,
+      required: true, 
+      options: [
+        { value: 'yes', label: 'Oui' },
+        { value: 'no', label: 'Non' },
+      ],
+    },
+    {
+      id: 'mainLanguage',
+      title: 'Quel est votre langage de programmation principal ?',
+      description: 'Cette question s\'affiche si vous avez répondu "Oui" à la précédente.',
+      type: QuestionType.TEXT,
+      placeholder: 'Ex: TypeScript, Python, Java...',
+      required: false, 
+    },
+    {
       id: 'generalFeedback',
       title: 'Vos remarques générales',
       description: 'Avez-vous des commentaires, suggestions ou retours à nous faire parvenir ?',

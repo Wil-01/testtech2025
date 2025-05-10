@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -37,7 +38,9 @@ const generateFormSchema = () => {
           required_error: "Ce champ est requis.",
           invalid_type_error: "Doit être une chaîne de caractères.",
         });
-        if (question.required) {
+        if (question.id === 'mainLanguage') {
+          baseSchema = (baseSchema as z.ZodString).optional().default("");
+        } else if (question.required) {
           baseSchema = (baseSchema as z.ZodString).min(1, { message: "Ce champ est requis." });
         } else {
           baseSchema = (baseSchema as z.ZodString).optional().default("");
@@ -53,8 +56,7 @@ const generateFormSchema = () => {
           },
           z.number({ invalid_type_error: "Veuillez entrer un nombre valide." })
         );
-
-        if (question.required) {
+        if (question.required && question.id !== 'dependentNumberField') {
           // baseSchema = (baseSchema as z.ZodNumber).min(0, "Doit être positif ou nul.");
         } else {
           baseSchema = (baseSchema as z.ZodNumber).optional().nullable();
@@ -92,22 +94,34 @@ const generateFormSchema = () => {
     schemaFields[question.id] = baseSchema;
   });
 
-  return z.object(schemaFields);
+  const baseObjectSchema = z.object(schemaFields);
+
+  return baseObjectSchema.superRefine((data, ctx) => {
+    if (data.isDeveloper === 'yes') {
+      if (!data.mainLanguage || (typeof data.mainLanguage === 'string' && data.mainLanguage.trim() === '')) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Le langage principal est requis si vous êtes développeur.",
+          path: ['mainLanguage'],
+        });
+      }
+    }
+  });
 };
 
 const formSchema = generateFormSchema();
 type FormValues = z.infer<typeof formSchema>;
 
 const getDefaultValues = (): FormValues => {
-  const defaultValues: Partial<FormValues> = {}; 
+  const defaultValues: Partial<FormValues> = {};
   questions.forEach(q => {
     const key = q.id as keyof FormValues;
     if (q.type === QuestionType.MULTI_SELECT) {
-      defaultValues[key] = []; 
+      defaultValues[key] = [];
     } else if (q.type === QuestionType.NUMBER) {
-      defaultValues[key] = undefined; 
+      defaultValues[key] = undefined;
     } else {
-      defaultValues[key] = ""; 
+      defaultValues[key] = "";
     }
   });
   return defaultValues as FormValues;
@@ -120,18 +134,25 @@ export default function QuestionnairePage() {
     defaultValues: getDefaultValues(),
   });
 
+  const { watch, setValue, clearErrors } = form;
   const isLoading = form.formState.isSubmitting;
+
+  const isDeveloperValue = watch('isDeveloper');
+
+  useEffect(() => {
+    if (isDeveloperValue !== 'yes') {
+      setValue('mainLanguage', '', { shouldValidate: false, shouldDirty: false, shouldTouch: false });
+      clearErrors('mainLanguage');
+    }
+  }, [isDeveloperValue, setValue, clearErrors]);
 
   async function onSubmit(data: FormValues) {
     const submissionToastId = "form-submission-toast";
-  
-    console.log("Données du formulaire à envoyer:", data);
-  
     toast.loading("Formulaire en cours d'envoi...", {
       id: submissionToastId,
       description: "Veuillez patienter.",
     });
-  
+
     try {
       const response = await fetch('/api/submit-questionnaire', {
         method: 'POST',
@@ -140,9 +161,9 @@ export default function QuestionnairePage() {
         },
         body: JSON.stringify(data),
       });
-  
-      const result = await response.json(); 
-  
+
+      const result = await response.json();
+
       if (!response.ok) {
         console.error("Erreur API:", result);
         toast.error("Erreur lors de l'envoi des réponses.", {
@@ -150,18 +171,18 @@ export default function QuestionnairePage() {
           description: result.message || "Une erreur s'est produite. Veuillez réessayer.",
           duration: 5000,
         });
-        return; 
+        return;
       }
-  
+
       toast.success("Réponses enregistrées avec succès !", {
         id: submissionToastId,
         description: `Merci ! Votre ID de réponse est : ${result.responseId || ''}`,
-        duration: 7000, 
+        duration: 7000,
       });
-  
-      form.reset(); 
+
+      form.reset();
       router.push(`/test-technique/merci?responseId=${result.responseId || ''}`);
-  
+
     } catch (error) {
       console.error("Erreur réseau ou fetch:", error);
       toast.error("Erreur réseau.", {
@@ -173,6 +194,12 @@ export default function QuestionnairePage() {
   }
 
   const renderQuestionField = (question: Question) => {
+    console.log("Render attempt for question:", question.id, question.title);
+    if (question.id === 'mainLanguage' && isDeveloperValue !== 'yes') {
+      console.log("Hiding mainLanguage because isDeveloperValue is:", isDeveloperValue);
+      return null;
+    }
+
     return (
       <FormField
         key={question.id}
@@ -208,6 +235,7 @@ export default function QuestionnairePage() {
                     return <Textarea placeholder={question.placeholder} {...field} />;
                   case QuestionType.RADIO:
                     if (question.options && question.options.length > 0) {
+                      console.log("Rendering RADIO for:", question.id);
                       return (
                         <RadioGroup
                           onValueChange={field.onChange}
@@ -225,6 +253,7 @@ export default function QuestionnairePage() {
                         </RadioGroup>
                       );
                     }
+                    console.error("RADIO config error for:", question.id);
                     return <p className="text-red-500">Configuration incorrecte: Options manquantes pour la question radio "{question.title}"</p>;
                   case QuestionType.MULTI_SELECT:
                     if (question.options && question.options.length > 0) {
@@ -300,7 +329,24 @@ export default function QuestionnairePage() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {questions.map(renderQuestionField)}
+          {questions.map((question) => {
+            const fieldElement = renderQuestionField(question);
+            if (!fieldElement) return null; 
+
+            if (question.id === 'mainLanguage') {
+              return (
+                <div
+                  key={question.id} 
+                  className={`transition-all duration-500 ease-in-out overflow-hidden ${
+                    isDeveloperValue === 'yes' ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  {fieldElement}
+                </div>
+              );
+            }
+            return fieldElement; 
+          })}
           <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
             {isLoading ? "Envoi en cours..." : "Envoyer mes réponses"}
           </Button>
