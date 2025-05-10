@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { PrismaClient } from "@/generated/prisma";
 import { questions, QuestionType } from '@/lib/questions';
 
+// Construction du schéma Zod côté serveur, basé sur la configuration des questions.
 const generateServerFormSchema = () => {
   const schemaFields: Record<string, z.ZodTypeAny> = {};
   questions.forEach(question => {
@@ -59,6 +60,7 @@ const generateServerFormSchema = () => {
   return z.object(schemaFields);
 };
 
+// Initialisation du Schéma de Validation Serveur
 const serverFormSchema = generateServerFormSchema();
 
 let prisma: PrismaClient;
@@ -89,6 +91,7 @@ export async function POST(request: Request) {
 
     const validatedData = validationResult.data;
 
+    // Crée un nouvel enregistrement dans la table SurveyResponse avec les données validées
     const newResponse = await prisma.surveyResponse.create({
       data: {
         answers: validatedData,

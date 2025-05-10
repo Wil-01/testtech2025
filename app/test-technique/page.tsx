@@ -1,5 +1,6 @@
 "use client";
 
+// React et hooks essentiels pour la gestion du formulaire et des effets secondaires.
 import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -26,6 +27,8 @@ import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 
 import { questions, questionnaireHeader, Question, QuestionType } from "@/lib/questions";
 
+// Génération Dynamique du Schéma de Validation Zod
+// COnstruction du schéma Zod basé sur la configuration des questions.
 const generateFormSchema = () => {
   const schemaFields: Record<string, z.ZodTypeAny> = {};
 
@@ -38,7 +41,7 @@ const generateFormSchema = () => {
           required_error: "Ce champ est requis.",
           invalid_type_error: "Doit être une chaîne de caractères.",
         });
-        if (question.id === 'mainLanguage') {
+        if (question.id === 'mainLanguage') { 
           baseSchema = (baseSchema as z.ZodString).optional().default("");
         } else if (question.required) {
           baseSchema = (baseSchema as z.ZodString).min(1, { message: "Ce champ est requis." });
@@ -56,8 +59,8 @@ const generateFormSchema = () => {
           },
           z.number({ invalid_type_error: "Veuillez entrer un nombre valide." })
         );
-        if (question.required && question.id !== 'dependentNumberField') {
-          // baseSchema = (baseSchema as z.ZodNumber).min(0, "Doit être positif ou nul.");
+        if (question.required) {
+          // .min(0) 
         } else {
           baseSchema = (baseSchema as z.ZodNumber).optional().nullable();
         }
@@ -96,6 +99,7 @@ const generateFormSchema = () => {
 
   const baseObjectSchema = z.object(schemaFields);
 
+  // Ajout d'une validation inter-champs (superRefine) pour la logique conditionnelle
   return baseObjectSchema.superRefine((data, ctx) => {
     if (data.isDeveloper === 'yes') {
       if (!data.mainLanguage || (typeof data.mainLanguage === 'string' && data.mainLanguage.trim() === '')) {
@@ -109,9 +113,10 @@ const generateFormSchema = () => {
   });
 };
 
-const formSchema = generateFormSchema();
-type FormValues = z.infer<typeof formSchema>;
+const formSchema = generateFormSchema(); 
+type FormValues = z.infer<typeof formSchema>; 
 
+// Génération des Valeurs par Défaut du Formulaire
 const getDefaultValues = (): FormValues => {
   const defaultValues: Partial<FormValues> = {};
   questions.forEach(q => {
@@ -127,16 +132,18 @@ const getDefaultValues = (): FormValues => {
   return defaultValues as FormValues;
 }
 
+// Composant Principal de la Page Questionnaire
 export default function QuestionnairePage() {
-  const router = useRouter();
+  const router = useRouter(); 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultValues(),
   });
 
-  const { watch, setValue, clearErrors } = form;
-  const isLoading = form.formState.isSubmitting;
+  const { watch, setValue, clearErrors } = form; 
+  const isLoading = form.formState.isSubmitting; 
 
+  // Surveille la valeur du champ 'isDeveloper' pour afficher/cacher 'mainLanguage'
   const isDeveloperValue = watch('isDeveloper');
 
   useEffect(() => {
@@ -146,6 +153,7 @@ export default function QuestionnairePage() {
     }
   }, [isDeveloperValue, setValue, clearErrors]);
 
+  // Gestion de la Soumission du Formulaire
   async function onSubmit(data: FormValues) {
     const submissionToastId = "form-submission-toast";
     toast.loading("Formulaire en cours d'envoi...", {
@@ -164,7 +172,7 @@ export default function QuestionnairePage() {
 
       const result = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok) { 
         console.error("Erreur API:", result);
         toast.error("Erreur lors de l'envoi des réponses.", {
           id: submissionToastId,
@@ -174,16 +182,17 @@ export default function QuestionnairePage() {
         return;
       }
 
+      // Succès de la soumission
       toast.success("Réponses enregistrées avec succès !", {
         id: submissionToastId,
         description: `Merci ! Votre ID de réponse est : ${result.responseId || ''}`,
         duration: 7000,
       });
 
-      form.reset();
+      form.reset(); 
       router.push(`/test-technique/merci?responseId=${result.responseId || ''}`);
 
-    } catch (error) {
+    } catch (error) { 
       console.error("Erreur réseau ou fetch:", error);
       toast.error("Erreur réseau.", {
         id: submissionToastId,
@@ -193,13 +202,13 @@ export default function QuestionnairePage() {
     }
   }
 
+  // Fonction qui génère le JSX pour chaque question en fonction de son type
   const renderQuestionField = (question: Question) => {
-    console.log("Render attempt for question:", question.id, question.title);
     if (question.id === 'mainLanguage' && isDeveloperValue !== 'yes') {
-      console.log("Hiding mainLanguage because isDeveloperValue is:", isDeveloperValue);
       return null;
     }
 
+    // Utilisation de FormField de Shadcn pour intégrer chaque champ avec react-hook-form
     return (
       <FormField
         key={question.id}
@@ -214,7 +223,7 @@ export default function QuestionnairePage() {
               </FormDescription>
             )}
             <FormControl>
-              {(() => {
+              {(() => { 
                 switch (question.type) {
                   case QuestionType.TEXT:
                     return <Input placeholder={question.placeholder} {...field} />;
@@ -235,7 +244,6 @@ export default function QuestionnairePage() {
                     return <Textarea placeholder={question.placeholder} {...field} />;
                   case QuestionType.RADIO:
                     if (question.options && question.options.length > 0) {
-                      console.log("Rendering RADIO for:", question.id);
                       return (
                         <RadioGroup
                           onValueChange={field.onChange}
@@ -253,7 +261,6 @@ export default function QuestionnairePage() {
                         </RadioGroup>
                       );
                     }
-                    console.error("RADIO config error for:", question.id);
                     return <p className="text-red-500">Configuration incorrecte: Options manquantes pour la question radio "{question.title}"</p>;
                   case QuestionType.MULTI_SELECT:
                     if (question.options && question.options.length > 0) {
@@ -298,15 +305,17 @@ export default function QuestionnairePage() {
                 }
               })()}
             </FormControl>
-            <FormMessage />
+            <FormMessage /> 
           </FormItem>
         )}
       />
     );
   };
 
+  // Structure de la Page
   return (
     <div className="container mx-auto max-w-2xl py-8 px-4">
+      {/* En-tête du questionnaire (image, titre, description globale) */}
       <div className="mb-8 text-center">
         {questionnaireHeader.imageUrl && (questionnaireHeader.imageUrl.startsWith('http') || questionnaireHeader.imageUrl.startsWith('/')) && (
            <Image
@@ -327,31 +336,34 @@ export default function QuestionnairePage() {
       </div>
       <hr className="my-8" />
 
+      {/* Composant Form de Shadcn qui wrappe le formulaire HTML natif */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {questions.map((question) => {
             const fieldElement = renderQuestionField(question);
-            if (!fieldElement) return null; 
+            if (!fieldElement) return null;
 
+            // Wrapper conditionnel pour l'animation de la question 'mainLanguage'
             if (question.id === 'mainLanguage') {
               return (
                 <div
-                  key={question.id} 
+                  key={question.id}
                   className={`transition-all duration-500 ease-in-out overflow-hidden ${
-                    isDeveloperValue === 'yes' ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+                    isDeveloperValue === 'yes' ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0' 
                   }`}
                 >
                   {fieldElement}
                 </div>
               );
             }
-            return fieldElement; 
+            return fieldElement;
           })}
           <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
             {isLoading ? "Envoi en cours..." : "Envoyer mes réponses"}
           </Button>
         </form>
       </Form>
+      {/* Conteneur pour les notifications Toast */}
       <SonnerToaster richColors position="top-right" />
     </div>
   );
