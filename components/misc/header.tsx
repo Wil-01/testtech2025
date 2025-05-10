@@ -19,7 +19,7 @@ export default function Header() {
           className={cn(
             buttonVariants({
               variant: "default",
-              size: "default_responsive",
+              size: "default",
             }),
             "font-clash text-md w-fit font-medium",
           )}
